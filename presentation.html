@@ -43,11 +43,11 @@ body::after{
 .sound{position:fixed;left:16px;bottom:22px;z-index:60;width:42px;height:42px;border-radius:50%;border:2.5px solid var(--ink);background:#fff;color:var(--ink);font-size:17px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .2s}
 .sound:hover{transform:scale(1.08)}
 
-.slide{position:absolute;inset:0;z-index:10;background:var(--paper);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s;padding:48px 6vw;overflow:hidden}
+.slide{position:absolute;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s;padding:48px 6vw;overflow:hidden}
 .slide.active{opacity:1;visibility:visible}
 .slide .inner{width:100%;max-width:1000px;text-align:center}
-.slide .pg{position:absolute;right:14px;bottom:10px;font-family:'Anton',sans-serif;font-size:clamp(3.6rem,8vw,6.5rem);line-height:.9;color:rgba(10,10,10,.16);text-shadow:2px 2px 0 rgba(255,255,255,.55);pointer-events:none;z-index:0;letter-spacing:0}
-.slide.cont-left .pg{right:calc(50% + 16px)}
+.slide .pg{position:fixed;right:14px;bottom:10px;z-index:38;font-family:'Anton',sans-serif;font-size:clamp(3.6rem,8vw,6.5rem);line-height:.9;color:rgba(10,10,10,.16);text-shadow:2px 2px 0 rgba(255,255,255,.55);pointer-events:none;letter-spacing:0}
+.slide.cont-left .pg{color:rgba(255,255,255,.8);text-shadow:2px 2px 0 rgba(0,0,0,.85)}
 
 .slide.video-layout{padding:0}
 .slide.video-layout .inner{position:absolute;top:0;bottom:0;width:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7vh 3vw}
@@ -202,12 +202,10 @@ h1.big{font-size:clamp(2.4rem,7vw,5rem);line-height:.98;color:var(--ink);text-sh
 .tile.active{opacity:1;visibility:visible;transform:none}
 .tile .fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:11px;color:#6b6b6b;letter-spacing:.5px;line-height:1.5}
 .tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.tile .tag{position:absolute;bottom:8px;left:8px;z-index:2;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.65);padding:4px 8px;border:1.5px solid #fff}
 
 #video3{position:fixed;inset:0;z-index:40;background:#000;opacity:0;visibility:hidden;transition:opacity .6s,visibility .6s}
 #video3.show{opacity:1;visibility:visible}
 #video3 video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-#video3 .v3-top{position:absolute;top:20px;left:0;right:0;text-align:center;z-index:3}
 #video3 .fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a5a;font-size:14px;z-index:0}
 #video3 .v3-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.86);z-index:2;opacity:0;transition:opacity .6s}
 #video3 .v3-overlay.show{opacity:1}
@@ -489,7 +487,7 @@ h1.big{font-size:clamp(2.4rem,7vw,5rem);line-height:.98;color:var(--ink);text-sh
     <div class="cards2">
       <div class="card pop" style="--d:.3s"><span class="x">▣</span><b>Discipline.</b> Not an app. Boring, consistent, and it actually works.</div>
       <div class="card pop" style="--d:.42s"><span class="x">▣</span><b>Self-control.</b> Timer on. Phone in another room. Door closed.</div>
-      <div class="card pop" style="--d:.54s"><span class="x">▣</span><b>Sleep &amp; exercise.</b> Your attention runs on fuel. Refuel.</div>
+      <div class="card pop" style="--d:.54s"><span class="x">▣</span><b>Dopamine reset.</b> Starve the shortcuts. A little boredom reboots the reward system.</div>
       <div class="card pop" style="--d:.66s"><span class="x">▣</span><b>Boundaries.</b> One feed, scheduled. Not infinite.</div>
     </div>
     <p class="quiz-note rise" style="--d:.8s">sorry — there is no app for that. the app is <b>you</b>.</p>
@@ -520,21 +518,18 @@ h1.big{font-size:clamp(2.4rem,7vw,5rem);line-height:.98;color:var(--ink);text-sh
     <div class="now-playing" id="nowPlaying">now playing · <b>subway surfers</b></div>
     <div class="tile" id="tile1">
       <div class="fallback">drop <b>vid1.mp4</b> here —<br>subway surfers gameplay</div>
-      <span class="tag">subway surfers · left half</span>
       <video id="vid1" autoplay muted loop playsinline preload="auto"></video>
     </div>
     <div class="tile" id="tile2">
       <div class="fallback">drop <b>vid2.mp4</b> here —<br>minecraft parkour</div>
-      <span class="tag">minecraft parkour · right half</span>
       <video id="vid2" autoplay muted loop playsinline preload="auto"></video>
     </div>
   </div>
 </div>
 
 <div id="video3">
-  <div class="v3-top"><div class="kicker">no questions were answered</div></div>
   <div class="fallback">drop <b>vid3.mp4</b> here</div>
-  <video id="vid3" autoplay muted playsinline preload="auto"></video>
+  <video id="vid3" autoplay playsinline preload="auto"></video>
   <div class="v3-overlay" id="v3Overlay">
     <h2>that's it.</h2>
     <p>go touch grass. thanks for watching.</p>
@@ -589,6 +584,10 @@ function setVid(which){
   tile1.classList.toggle('active', which === 'v1');
   tile2.classList.toggle('active', which === 'v2');
   curVid = which;
+  v1.pause();
+  v2.pause();
+  if (which === 'v1') v1.play().catch(() => {});
+  else if (which === 'v2') v2.play().catch(() => {});
 }
 
 function show(i){
@@ -612,13 +611,18 @@ function show(i){
     if (vid !== curVid) setVid(vid);
   } else {
     zone.classList.remove('show');
+    v1.pause();
+    v2.pause();
   }
   if (cur === lastIdx) {
     video3.classList.add('show');
+    v1.pause();
+    v2.pause();
     if (!v3Started) { v3.play().catch(() => {}); v3Started = true; }
     if (v3Ended) v3overlay.classList.add('show');
   } else {
     video3.classList.remove('show');
+    v3.pause();
   }
 }
 
@@ -678,7 +682,7 @@ document.addEventListener('pointerup', e => {
 
 soundBtn.addEventListener('click', () => {
   soundOn = !soundOn;
-  [v1, v2, v3].forEach(v => { v.muted = !soundOn; });
+  [v1, v2].forEach(v => { v.muted = !soundOn; });
   soundBtn.textContent = soundOn ? '🔊' : '🔇';
 });
 
