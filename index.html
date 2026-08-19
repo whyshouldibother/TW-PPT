@@ -608,7 +608,7 @@ function show(i){
     zone.classList.toggle('left', vid === 'v1');
     zone.classList.toggle('right', vid === 'v2');
     zone.classList.add('show');
-    if (vid !== curVid) setVid(vid);
+    setVid(vid);
   } else {
     zone.classList.remove('show');
     v1.pause();
@@ -616,10 +616,13 @@ function show(i){
   }
   if (cur === lastIdx) {
     video3.classList.add('show');
+    v3overlay.classList.remove('show');
     v1.pause();
     v2.pause();
-    if (!v3Started) { v3.play().catch(() => {}); v3Started = true; }
-    if (v3Ended) v3overlay.classList.add('show');
+    v3Ended = false;
+    v3.currentTime = 0;
+    v3.play().catch(() => {});
+    v3Started = true;
   } else {
     video3.classList.remove('show');
     v3.pause();
