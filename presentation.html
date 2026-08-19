@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decreasing Attention Span</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2f1ea;
+  --ink:#0a0a0a;
+  --red:#ff2e2e;
+  --amber:#ffb700;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--ink);
+  color:var(--ink);
+  overflow:hidden;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+  cursor:pointer;
+}
+h1,h2,h3,.display{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.5px;text-transform:uppercase}
+
+body::after{
+  content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.progress{position:fixed;top:0;left:0;right:0;height:6px;z-index:60;background:rgba(0,0,0,.14)}
+#progressBar{height:100%;width:0;background:var(--red);transition:width .5s ease}
+
+.counter{position:fixed;top:12px;right:16px;z-index:60;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:#fff;background:var(--ink);border:2px solid var(--ink);padding:5px 12px;box-shadow:3px 3px 0 var(--red)}
+.counter b{color:var(--red)}
+.hint{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:60;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:#333;background:#fff;border:2px solid var(--ink);padding:6px 14px;box-shadow:3px 3px 0 var(--ink);transition:opacity 1s}
+.hint.hide{opacity:0}
+.sound{position:fixed;left:16px;bottom:22px;z-index:60;width:42px;height:42px;border-radius:50%;border:2.5px solid var(--ink);background:#fff;color:var(--ink);font-size:17px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .2s}
+.sound:hover{transform:scale(1.08)}
+
+.slide{position:absolute;inset:0;z-index:10;background:var(--paper);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s;padding:48px 6vw;overflow:hidden}
+.slide.active{opacity:1;visibility:visible}
+.slide .inner{width:100%;max-width:1000px;text-align:center}
+.slide .pg{position:absolute;right:14px;bottom:10px;font-family:'Anton',sans-serif;font-size:clamp(3.6rem,8vw,6.5rem);line-height:.9;color:rgba(10,10,10,.16);text-shadow:2px 2px 0 rgba(255,255,255,.55);pointer-events:none;z-index:0;letter-spacing:0}
+.slide.cont-left .pg{right:calc(50% + 16px)}
+
+.slide.video-layout{padding:0}
+.slide.video-layout .inner{position:absolute;top:0;bottom:0;width:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7vh 3vw}
+.slide.cont-right .inner{left:50%}
+.slide.cont-left .inner{left:0}
+.slide.video-layout h1.big{font-size:clamp(1.9rem,4vw,3.4rem);line-height:1}
+.slide.video-layout .kicker{margin-bottom:14px;font-size:clamp(9px,1.2vw,11px);padding:5px 10px}
+.slide.video-layout .sub{font-size:clamp(.9rem,1.7vw,1.1rem)}
+.slide.video-layout .cards2{grid-template-columns:1fr;gap:11px;margin-top:16px}
+.slide.video-layout .card{font-size:clamp(.8rem,1.35vw,1rem);padding:11px 14px}
+.slide.video-layout .def-card{margin-top:18px;padding:15px 18px;border-left-width:8px}
+.slide.video-layout .def-card p{font-size:clamp(.95rem,1.9vw,1.3rem)}
+.slide.video-layout .quiz-note{font-size:clamp(10px,1.3vw,12px);margin-top:12px}
+.slide.video-layout .tl{margin-top:14px;gap:7px}
+.slide.video-layout .tl-item{padding:8px 14px;box-shadow:4px 4px 0 var(--ink)}
+.slide.video-layout .tl-item .yr{font-size:clamp(.95rem,1.7vw,1.15rem);min-width:74px}
+.slide.video-layout .tl-item .txt{font-size:clamp(.8rem,1.5vw,.95rem)}
+.slide.video-layout .chart{margin-top:16px;gap:10px}
+.slide.video-layout .brow{flex-direction:column;align-items:flex-start;gap:4px}
+.slide.video-layout .blabel{width:auto;text-align:left;font-size:clamp(.78rem,1.3vw,.92rem)}
+.slide.video-layout .btrack{height:28px;width:100%;border-width:2.5px}
+.slide.video-layout .chart-foot{margin-top:10px;font-size:clamp(9px,1.2vw,11px)}
+.slide.video-layout .stat-grid{grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.slide.video-layout .stat-tile{padding:10px 8px;box-shadow:4px 4px 0 var(--ink)}
+.slide.video-layout .stat-tile .num{font-size:clamp(1.2rem,2.8vw,2rem)}
+.slide.video-layout .stat-tile .cap{font-size:clamp(.62rem,1.15vw,.82rem);margin-top:6px}
+.slide.video-layout .stat-foot{margin-top:12px;font-size:clamp(9px,1.2vw,11px)}
+.slide.video-layout .fix-box{margin-top:16px;gap:10px}
+.slide.video-layout .fix-part{padding:18px 16px;font-size:clamp(.9rem,1.8vw,1.2rem);border-width:2.5px}
+.slide.video-layout .fix-part.plus{font-size:clamp(1.4rem,3.4vw,2.2rem)}
+.slide.video-layout .warn{margin-top:16px;padding:14px 18px;border-left-width:8px;box-shadow:6px 6px 0 var(--ink)}
+.slide.video-layout .warn h3{font-size:clamp(1rem,2vw,1.3rem)}
+.slide.video-layout .warn p{font-size:clamp(.82rem,1.5vw,1rem)}
+.slide.video-layout .q-big{font-size:clamp(2.4rem,7vw,5rem)}
+.slide.video-layout .stamp-chip{font-size:clamp(.9rem,2vw,1.3rem)}
+.slide.video-layout .stamp-wrap{margin-top:14px}
+.slide.video-layout .bar span{padding:0 7px;border-width:1.5px;box-shadow:1.5px 1.5px 0 rgba(0,0,0,.35)}
+
+.kicker{display:inline-block;font-family:'Space Mono',monospace;font-weight:700;letter-spacing:3px;font-size:clamp(10px,1.3vw,12px);text-transform:uppercase;color:var(--ink);background:#fff;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:6px 14px;margin-bottom:20px}
+h1.big{font-size:clamp(2.4rem,7vw,5rem);line-height:.98;color:var(--ink);text-shadow:4px 4px 0 rgba(0,0,0,.06)}
+.stroke{ -webkit-text-stroke:2.5px var(--ink); color:transparent }
+.stroke.r{ -webkit-text-stroke-color:var(--red) }
+.accent{color:var(--red)}
+.sub{margin-top:14px;font-size:clamp(1rem,2.1vw,1.35rem);color:#26262a;font-weight:400}
+.sub b{color:var(--red)}
+
+.pop,.rise,.fade,.slideL,.slideR{opacity:0}
+.slide.active .pop{animation:popIn .55s ease var(--d,0s) both}
+.slide.active .rise{animation:riseIn .55s ease var(--d,0s) both}
+.slide.active .fade{animation:fadeIn .9s ease var(--d,0s) both}
+@keyframes popIn{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
+@keyframes riseIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.intro-paper{position:absolute;inset:0;z-index:2;background:#fff;display:flex;align-items:center;justify-content:center;padding:6vh 6vw}
+.intro-inner{max-width:920px;text-align:center}
+.meta-line{font-family:'Space Mono',monospace;font-size:clamp(10px,1.4vw,13px);font-weight:700;letter-spacing:2px;color:#555;margin-bottom:20px}
+.fake-title{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(2.1rem,6.5vw,4.6rem);line-height:1.02;color:var(--ink)}
+.fake-title .em{color:var(--red);font-style:italic}
+.abstract{margin:18px auto 0;font-size:clamp(.92rem,1.9vw,1.15rem);line-height:1.6;color:#2a2a30;max-width:60ch}
+.byline{margin-top:22px;font-family:'Space Mono',monospace;font-size:clamp(10px,1.4vw,12px);color:#555;border-top:2px dashed #999;padding-top:12px}
+.refs{margin-top:8px;font-family:'Space Mono',monospace;font-size:clamp(9px,1.2vw,11px);color:#888}
+.fake-title.shake{animation:shake .5s ease}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-7px,2px) rotate(-1deg)}40%{transform:translate(7px,-2px) rotate(1deg)}60%{transform:translate(-5px,-2px)}80%{transform:translate(5px,2px)}}
+.slash{position:absolute;left:0;top:44%;height:8px;width:0;background:var(--red);box-shadow:0 0 24px var(--red);transform:rotate(-3deg);z-index:5}
+.slash.go{animation:slashCut .32s ease-out forwards}
+@keyframes slashCut{from{width:0}to{width:104%}}
+.stamp{position:absolute;right:6%;top:14%;transform:scale(0) rotate(-40deg);font-family:'Anton',sans-serif;font-size:clamp(1.5rem,4vw,2.8rem);color:var(--red);border:5px solid var(--red);padding:4px 18px;text-transform:uppercase;letter-spacing:2px;box-shadow:0 0 30px rgba(255,46,46,.45)}
+.stamp.go{animation:stamp .35s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes stamp{from{transform:scale(2.4) rotate(-40deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
+.intro-paper.cut{animation:cutAway .5s cubic-bezier(.6,0,.8,.3) forwards}
+@keyframes cutAway{from{opacity:1;clip-path:inset(-20% -20% -20% -20%)}30%{opacity:1}to{opacity:0;clip-path:inset(100% -20% -20% -20%);transform:translateX(-40px) rotate(-3deg)}}
+.real-block{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6vh 6vw;opacity:0;transform:translateY(60px) scale(.9)}
+.real-block.show{animation:realIn .85s cubic-bezier(.2,.9,.25,1.15) forwards}
+@keyframes realIn{to{opacity:1;transform:none}}
+.real-title{font-size:clamp(3rem,10vw,7rem);line-height:.9;color:var(--ink)}
+.real-title .r{color:var(--red);text-shadow:6px 6px 0 rgba(255,46,46,.18)}
+.real-title .o{ -webkit-text-stroke:3px var(--ink); color:transparent }
+.real-block .sub{margin-top:16px}
+.real-block .sub2{margin-top:8px;font-family:'Space Mono',monospace;font-size:12px;color:#666}
+
+.card{background:#fff;border:2.5px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:15px 17px;font-size:clamp(.88rem,1.65vw,1.08rem);line-height:1.4;transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
+.card .x{color:var(--red);font-weight:800;margin-right:8px}
+.card b{color:var(--ink)}
+.def-card{margin-top:26px;text-align:left;background:#fff;border:3px solid var(--ink);border-left:10px solid var(--red);box-shadow:8px 8px 0 var(--ink);padding:clamp(18px,3vw,28px)}
+.def-card p{font-size:clamp(1.05rem,2.3vw,1.5rem);line-height:1.4;font-weight:500}
+.def-card em{color:var(--red);font-style:normal;font-weight:800;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:3px}
+.cards2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;text-align:left}
+.quiz-note{margin-top:16px;font-family:'Space Mono',monospace;font-size:clamp(11px,1.5vw,13px);color:#444}
+.quiz-note b{color:var(--red)}
+
+.chart{margin-top:24px;display:flex;flex-direction:column;gap:12px;text-align:left}
+.brow{display:flex;align-items:center;gap:14px}
+.blabel{width:230px;flex-shrink:0;text-align:right;font-weight:800;font-size:clamp(.82rem,1.45vw,1rem);color:#111}
+.btrack{flex:1;height:38px;background:#d8d7cc;border:3px solid var(--ink);position:relative}
+.bar{position:absolute;inset:0;transform-origin:left center;background:var(--ink);display:flex;align-items:center;justify-content:flex-end;padding-right:12px;color:var(--ink);font-weight:800;font-size:clamp(.78rem,1.35vw,.95rem)}
+.bar span{display:inline-block;background:#fff;border:2px solid var(--ink);box-shadow:2px 2px 0 rgba(0,0,0,.35);padding:1px 8px;line-height:1.25;color:var(--ink);white-space:nowrap}
+.bar::after{content:"";position:absolute;right:-11px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;background:var(--ink);border:3px solid #fff}
+.bar.red::after{background:var(--red)}
+.slide.active .bar{animation:grow .9s cubic-bezier(.2,.9,.3,1.1) var(--d,0s) both}
+.bar.red{background:var(--red)}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.chart-foot{margin-top:14px;font-family:'Space Mono',monospace;font-size:clamp(10px,1.4vw,12px);color:#444}
+.chart-foot b{color:var(--red)}
+
+.tl{margin-top:22px;display:flex;flex-direction:column;gap:9px;text-align:left}
+.tl-item{display:flex;gap:16px;align-items:baseline;background:#fff;border:2.5px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:10px 16px}
+.tl-item .yr{font-family:'Anton',sans-serif;font-size:clamp(1rem,1.9vw,1.3rem);color:var(--red);white-space:nowrap;min-width:86px}
+.tl-item .txt{font-size:clamp(.85rem,1.65vw,1.05rem);color:#222;line-height:1.35}
+.tl-item .txt b{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
+
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+.stat-tile{background:#fff;border:2.5px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:14px 10px;text-align:center}
+.stat-tile .num{font-family:'Anton',sans-serif;font-size:clamp(1.5rem,3.4vw,2.6rem);line-height:1;color:var(--ink)}
+.stat-tile .num.r{color:var(--red)}
+.stat-tile .cap{margin-top:8px;font-size:clamp(.7rem,1.3vw,.88rem);color:#333;line-height:1.3;font-weight:600}
+.stat-foot{margin-top:16px;font-family:'Space Mono',monospace;font-size:clamp(10px,1.4vw,12px);color:#444}
+.stat-foot b{color:var(--red)}
+
+.fix-box{margin:22px auto 0;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.fix-part{font-family:'Anton',sans-serif;font-size:clamp(1rem,2.2vw,1.4rem);letter-spacing:1px;text-transform:uppercase;padding:24px 22px;border:3px solid var(--ink)}
+.fix-part.main{background:#fff;box-shadow:7px 7px 0 var(--ink)}
+.fix-part.game{background:var(--ink);color:#fff;box-shadow:7px 7px 0 var(--red)}
+.fix-part.plus{background:none;border:none;color:var(--red);font-size:clamp(1.6rem,4vw,2.6rem);padding:0;box-shadow:none}
+.stamp-chip{display:inline-block;font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(1rem,2.4vw,1.6rem);letter-spacing:3px;border:3.5px solid;padding:3px 18px;transform:rotate(-6deg);box-shadow:0 0 20px rgba(0,0,0,.12)}
+.stamp-chip.red{color:var(--red);border-color:var(--red)}
+.stamp-chip.black{color:var(--ink);border-color:var(--ink)}
+.stamp-wrap{margin-top:20px}
+
+.warn{margin-top:24px;text-align:left;background:#fff;border:3px solid var(--ink);border-left:10px solid var(--red);box-shadow:8px 8px 0 var(--ink);padding:clamp(16px,2.6vw,26px)}
+.warn h3{font-size:clamp(1.1rem,2.5vw,1.6rem);color:var(--red);margin-bottom:10px}
+.warn p{font-size:clamp(.9rem,1.8vw,1.15rem);color:#222;line-height:1.45}
+.warn p + p{margin-top:9px}
+.warn b{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
+
+.q-big{font-size:clamp(3rem,10vw,7rem);text-transform:uppercase;line-height:.92;color:var(--ink);text-shadow:6px 6px 0 rgba(0,0,0,.08)}
+.q-big .r{color:var(--red);text-shadow:6px 6px 0 rgba(255,46,46,.18)}
+
+#videozone{position:fixed;top:0;bottom:0;width:50%;z-index:30;background:var(--ink);display:flex;flex-direction:column;transition:left .65s cubic-bezier(.2,.9,.3,1.03),transform .65s cubic-bezier(.2,.9,.3,1.03)}
+#videozone.left{left:0;transform:translateX(-110%);border-right:4px solid var(--ink)}
+#videozone.right{left:50%;transform:translateX(110%);border-left:4px solid var(--ink)}
+#videozone.show{transform:none}
+
+.ticker-track span{padding:0 14px}
+.ticker-track span.r{color:var(--red)}
+
+.stage{position:relative;flex:1}
+.now-playing{position:absolute;top:10px;left:12px;z-index:6;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;background:var(--ink);border:2px solid #fff;padding:3px 9px}
+.now-playing b{color:var(--red)}
+.tile{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateY(18px);transition:opacity .6s ease,visibility .6s,transform .6s ease;overflow:hidden;background:#0c0c0c;border:3px solid #fff;z-index:4}
+.tile.active{opacity:1;visibility:visible;transform:none}
+.tile .fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:11px;color:#6b6b6b;letter-spacing:.5px;line-height:1.5}
+.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile .tag{position:absolute;bottom:8px;left:8px;z-index:2;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.65);padding:4px 8px;border:1.5px solid #fff}
+
+#video3{position:fixed;inset:0;z-index:40;background:#000;opacity:0;visibility:hidden;transition:opacity .6s,visibility .6s}
+#video3.show{opacity:1;visibility:visible}
+#video3 video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#video3 .v3-top{position:absolute;top:20px;left:0;right:0;text-align:center;z-index:3}
+#video3 .fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a5a;font-size:14px;z-index:0}
+#video3 .v3-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.86);z-index:2;opacity:0;transition:opacity .6s}
+#video3 .v3-overlay.show{opacity:1}
+#video3 .v3-overlay h2{font-size:clamp(2.4rem,7vw,4.5rem);text-transform:uppercase;color:#fff;border:4px solid #fff;padding:8px 26px}
+#video3 .v3-overlay p{margin-top:16px;font-size:clamp(1rem,2.2vw,1.3rem);color:#bbb}
+</style>
+</head>
+<body>
+
+<div class="progress"><div id="progressBar"></div></div>
+<main id="stage">
+<div class="counter" id="counter"><b>1</b> / 20</div>
+<div class="hint" id="hint">click · tap · space · → &nbsp;to continue</div>
+<button class="sound" id="soundBtn" title="toggle sound">🔇</button>
+
+<section class="slide no-vid active">
+  <div class="intro-paper" id="fakeBlock">
+    <div class="intro-inner">
+      <div class="meta-line">FINAL PRESENTATION · SPRING 2026 · SLIDE 1 OF 42</div>
+      <h1 class="fake-title" id="fakeTitle">A Comprehensive Review of the Anime <span class="em">"Mob Psycho"</span></h1>
+      <p class="abstract">This presentation offers an in-depth, peer-reviewed analysis of the critically acclaimed anime, exploring its themes of psychic power, personal growth, and the profound emotional arcs that have cemented it as a modern classic. Includes a full character study, thematic breakdown, and episode-by-episode commentary.</p>
+      <div class="byline">Presented by: a completely focused student</div>
+      <div class="refs">References: [1] Mob Psycho, [2] the manga, [3] trust me.</div>
+    </div>
+    <div class="slash" id="slash"></div>
+    <div class="stamp" id="stamp">WRONG.</div>
+  </div>
+  <div class="real-block" id="realBlock">
+    <div class="kicker">the actual topic</div>
+    <h1 class="real-title"><span class="o">Decreasing</span><br><span class="r">Attention Span</span></h1>
+    <p class="sub">(and how Subway Surfers quietly became the cure)</p>
+    <p class="sub2">press space / enter / click to continue</p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">02</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">addressing the elephant</div>
+    <h1 class="big rise" style="--d:.15s">Why didn't I present on <span class="stroke">"Mob Psycho"?</span></h1>
+    <div class="cards2">
+      <div class="card pop" style="--d:.3s"><span class="x">▣</span>Because my attention span couldn't survive <b>37 episodes across 3 seasons</b>.</div>
+      <div class="card pop" style="--d:.45s"><span class="x">▣</span>Because I <b>never even started</b> watching it. Don't tell the committee.</div>
+      <div class="card pop" style="--d:.6s"><span class="x">▣</span>Because the answer is the topic itself: <b>decreasing attention span</b>.</div>
+    </div>
+    <p class="quiz-note rise" style="--d:.8s">the first slide was a decoy. you caught it. either your attention is fine — <b>or you're just nosy.</b></p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">03</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">disclaimer</div>
+    <h1 class="big rise" style="--d:.15s">About the <span class="accent">presenter</span></h1>
+    <div class="cards2">
+      <div class="card pop" style="--d:.3s"><span class="x">▣</span>I have watched <b>100s of movies</b> — all through <b>recaps</b>.</div>
+      <div class="card pop" style="--d:.45s"><span class="x">▣</span>By 2022, there were <b>no recap videos on YouTube</b> I hadn't already seen.</div>
+    </div>
+    <p class="quiz-note rise" style="--d:.6s">recap videos are the <b>Subway Surfers of cinema</b>.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">04</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">chapter 01 · the basics</div>
+    <h1 class="big rise" style="--d:.15s">So... what even <span class="stroke">is</span> an attention span?</h1>
+    <p class="sub fade" style="--d:.45s">And when did it start <span class="accent">running away from us?</span></p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">05</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">definition</div>
+    <h1 class="big rise" style="--d:.15s">What is an <span class="stroke">attention span?</span></h1>
+    <div class="def-card rise" style="--d:.3s">
+      <p>Attention span = the length of time you can concentrate on one thing <em>before your brain files a complaint.</em></p>
+    </div>
+    <div class="cards2">
+      <div class="card pop" style="--d:.5s"><span class="x">▣</span>It can be trained — and right now it's on a <b>losing streak</b>.</div>
+      <div class="card pop" style="--d:.6s"><span class="x">▣</span>Average human: <b>~8 seconds</b>. A goldfish scores ~9. Yes, really.</div>
+      <div class="card pop" style="--d:.7s"><span class="x">▣</span>Attention ≠ interest. You're staring. You're not necessarily caring.</div>
+      <div class="card pop" style="--d:.8s"><span class="x">▣</span>"Multitasking" doesn't exist. It's just very fast <b>context-switching</b>.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">06</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">self-diagnosis</div>
+    <h1 class="big rise" style="--d:.15s">Symptoms of a low <span class="accent">attention span</span></h1>
+    <div class="cards2">
+      <div class="card pop" style="--d:.3s"><span class="x">✗</span>Can't watch a video longer than 30 seconds without grabbing your phone.</div>
+      <div class="card pop" style="--d:.4s"><span class="x">✗</span>You watch short videos at 2×... and still skip.</div>
+      <div class="card pop" style="--d:.5s"><span class="x">✗</span>Opened <b>47 tabs</b> "to read later". Later never came.</div>
+      <div class="card pop" style="--d:.6s"><span class="x">✗</span>Walked into the kitchen. Forgot why. Went back. Forgot again.</div>
+      <div class="card pop" style="--d:.7s"><span class="x">✗</span>A book chapter now feels like a <b>Netflix series commitment</b>.</div>
+      <div class="card pop" style="--d:.8s"><span class="x">✗</span>You've already checked your phone twice since this slide started.</div>
+    </div>
+    <p class="quiz-note rise" style="--d:.9s">that was the entire quiz. you nodded to <b>3+</b>? you're cooked.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">07</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">attention data</div>
+    <h1 class="big rise" style="--d:.15s">The <span class="stroke">data</span> doesn't lie</h1>
+    <div class="chart">
+      <div class="brow rise" style="--d:.3s"><span class="blabel">Unaffected person (2000)</span><div class="btrack"><div class="bar" style="width:100%"><span>12s</span></div></div></div>
+      <div class="brow rise" style="--d:.42s"><span class="blabel">Average person (today)</span><div class="btrack"><div class="bar" style="width:67%"><span>8s</span></div></div></div>
+      <div class="brow rise" style="--d:.54s"><span class="blabel">Person with low attention span</span><div class="btrack"><div class="bar" style="width:42%"><span>5s</span></div></div></div>
+      <div class="brow rise" style="--d:.66s"><span class="blabel">Goldfish</span><div class="btrack"><div class="bar red" style="width:75%"><span>9s</span></div></div></div>
+    </div>
+    <p class="chart-foot rise" style="--d:.8s">the goldfish is winning. it <b>always</b> has been.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">08</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">history lesson</div>
+    <h1 class="big rise" style="--d:.15s">A brief history of the <span class="accent">decline</span></h1>
+    <div class="tl">
+      <div class="tl-item rise" style="--d:.28s"><span class="yr">1450s</span><span class="txt">The printing press — people <b>read</b>. Focus was a hobby.</span></div>
+      <div class="tl-item rise" style="--d:.38s"><span class="yr">1920s</span><span class="txt">Radio &amp; TV — the first background distraction of their era.</span></div>
+      <div class="tl-item rise" style="--d:.48s"><span class="yr">1980s</span><span class="txt">Remote controls — we changed channels but <b>never watched</b>.</span></div>
+      <div class="tl-item rise" style="--d:.58s"><span class="yr">2000s</span><span class="txt">The internet — <b>everything, all at once</b>, always.</span></div>
+      <div class="tl-item rise" style="--d:.68s"><span class="yr">2007</span><span class="txt">Smartphones — the brain got a <b>leash</b>.</span></div>
+      <div class="tl-item rise" style="--d:.78s"><span class="yr">2016+</span><span class="txt">Short-form video — attention span: <b>it's over.</b></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">09</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">reason 01</div>
+    <h1 class="big rise" style="--d:.15s"><span class="stroke">Short-form</span> content</h1>
+    <div class="cards2">
+      <div class="card rise" style="--d:.35s"><span class="x">▣</span><b>Endless feeds.</b> TikTok, Reels, Shorts — a dopamine hit every 15–60 seconds.</div>
+      <div class="card rise" style="--d:.48s"><span class="x">▣</span><b>The scroll trap.</b> Infinite scroll = your thumb vs. your willpower.</div>
+      <div class="card rise" style="--d:.61s"><span class="x">▣</span><b>Patience reset.</b> Instant gratification rewrote our waiting settings to 0.</div>
+      <div class="card rise" style="--d:.74s"><span class="x">▣</span><b>RIP long videos.</b> A 10-minute YouTube video now feels like a documentary.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">10</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">reason 02</div>
+    <h1 class="big rise" style="--d:.15s">Abundance of <span class="accent">content</span></h1>
+    <div class="cards2">
+      <div class="card rise" style="--d:.35s"><span class="x">▣</span><b>Too many options.</b> Unlimited streaming, feeds, apps, memes. Every second of every day.</div>
+      <div class="card rise" style="--d:.48s"><span class="x">▣</span><b>Choice overload.</b> We can't pick, so we skim. We never actually read.</div>
+      <div class="card rise" style="--d:.61s"><span class="x">▣</span><b>Notification storm.</b> The average person gets ~80–100 pings a day.</div>
+      <div class="card rise" style="--d:.74s"><span class="x">▣</span><b>Snack culture.</b> We snack constantly and never sit down for a meal.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">11</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">reason 03</div>
+    <h1 class="big rise" style="--d:.15s">Dopamine &amp; <span class="stroke">instant</span> rewards</h1>
+    <div class="cards2">
+      <div class="card rise" style="--d:.35s"><span class="x">▣</span><b>Variable rewards.</b> You never know if the next video is gold — so you never stop.</div>
+      <div class="card rise" style="--d:.48s"><span class="x">▣</span><b>FOMO.</b> Missing out on anything, ever, is now a medical condition.</div>
+      <div class="card rise" style="--d:.61s"><span class="x">▣</span><b>Red-dot panic.</b> A notification is a small red flag your brain treats as a siren.</div>
+      <div class="card rise" style="--d:.74s"><span class="x">▣</span><b>Dopamine treadmill.</b> The bar for "interesting" rises faster than we can chase it.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">12</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">the content machine</div>
+    <h1 class="big rise" style="--d:.15s">YouTube, by the <span class="accent">numbers</span></h1>
+    <div class="stat-grid">
+      <div class="stat-tile pop" style="--d:.3s"><div class="num">500 hrs</div><div class="cap">uploaded every single minute</div></div>
+      <div class="stat-tile pop" style="--d:.4s"><div class="num">720k hrs</div><div class="cap">uploaded every day — ~82 years of video</div></div>
+      <div class="stat-tile pop" style="--d:.5s"><div class="num r">14B+</div><div class="cap">videos currently on the platform</div></div>
+      <div class="stat-tile pop" style="--d:.6s"><div class="num">114M+</div><div class="cap">channels — from studios to a guy with a webcam</div></div>
+      <div class="stat-tile pop" style="--d:.7s"><div class="num r">1B hrs</div><div class="cap">watched every day by ~2.5B users</div></div>
+      <div class="stat-tile pop" style="--d:.8s"><div class="num">100k yrs</div><div class="cap">to watch it all. and it's still growing</div></div>
+    </div>
+    <p class="stat-foot rise" style="--d:.9s">≈8 hours of new video uploaded <b>every second</b>. you lost 8 hours just reading this.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">13</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">the content machine · pt.2</div>
+    <h1 class="big rise" style="--d:.15s">TikTok, the <span class="stroke">purple</span> storm</h1>
+    <div class="stat-grid">
+      <div class="stat-tile pop" style="--d:.3s"><div class="num">1.6B</div><div class="cap">monthly users, and counting</div></div>
+      <div class="stat-tile pop" style="--d:.4s"><div class="num r">1B</div><div class="cap">videos uploaded every single day</div></div>
+      <div class="stat-tile pop" style="--d:.5s"><div class="num">167B</div><div class="cap">videos in existence — a hundred of them by you</div></div>
+      <div class="stat-tile pop" style="--d:.6s"><div class="num r">1.5 hrs</div><div class="cap">average time per user, per day</div></div>
+    </div>
+    <p class="stat-foot rise" style="--d:.7s">that's ~96 minutes of your life a day, straight into a <b>purple void</b>.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">14</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">the content machine · pt.3</div>
+    <h1 class="big rise" style="--d:.15s">Instagram &amp; the <span class="accent">reel</span> world</h1>
+    <div class="stat-grid">
+      <div class="stat-tile pop" style="--d:.3s"><div class="num">2B+</div><div class="cap">monthly users — half the planet scrolls</div></div>
+      <div class="stat-tile pop" style="--d:.4s"><div class="num r">95M</div><div class="cap">photos &amp; videos posted every day</div></div>
+      <div class="stat-tile pop" style="--d:.5s"><div class="num">4.2B</div><div class="cap">likes given every day. your thumb is a machine</div></div>
+      <div class="stat-tile pop" style="--d:.6s"><div class="num r">⅔ of feed</div><div class="cap">is now Reels — attention, served on a platter</div></div>
+    </div>
+    <p class="stat-foot rise" style="--d:.7s">remember when Instagram was just <b>square photos</b> of food? me neither.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">15</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">the content machine · pt.4</div>
+    <h1 class="big rise" style="--d:.15s">And everything <span class="stroke">else:</span> the flood</h1>
+    <div class="cards2">
+      <div class="card rise" style="--d:.35s"><span class="x">▣</span><b>Netflix:</b> 18,000+ titles. You've seen 4 of them.</div>
+      <div class="card rise" style="--d:.48s"><span class="x">▣</span><b>Prime + Disney+ + HBO + Crunchyroll +...</b> an infinite checklist.</div>
+      <div class="card rise" style="--d:.61s"><span class="x">▣</span><b>You will never catch up.</b> The content is winning. Accept it.</div>
+      <div class="card rise" style="--d:.74s"><span class="x">▣</span><b>While you read this slide:</b> ~150 more hours of video uploaded.</div>
+    </div>
+    <p class="quiz-note rise" style="--d:.85s">there is too much content. <b>obviously.</b></p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">16</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">chapter 02 · the "solutions"</div>
+    <h1 class="big rise" style="--d:.15s">The solutions <span class="accent">everyone</span> recommends</h1>
+    <div class="cards2">
+      <div class="card pop" style="--d:.3s"><span class="x">▲</span><b>Pomodoro timer.</b> 25 minutes on, 5 off. You lasted 3 minutes on.</div>
+      <div class="card pop" style="--d:.4s"><span class="x">▲</span><b>Notion.</b> You built a beautiful focus dashboard. Never opened it again.</div>
+      <div class="card pop" style="--d:.5s"><span class="x">▲</span><b>Forest app.</b> You planted a tree, got distracted, and it <b>died</b>.</div>
+      <div class="card pop" style="--d:.6s"><span class="x">▲</span><b>Screen-time limits.</b> You ignore them. So do we.</div>
+    </div>
+    <p class="quiz-note rise" style="--d:.75s">all of them failed. why? because <b>none of them involve running from a virtual cop.</b></p>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">17</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">chapter 03 · the real fix</div>
+    <h1 class="big rise" style="--d:.15s">The actual <span class="stroke">fix</span></h1>
+    <div class="fix-box">
+      <div class="fix-part main rise" style="--d:.4s">boring video</div>
+      <div class="fix-part plus rise" style="--d:.5s">+</div>
+      <div class="fix-part game rise" style="--d:.6s">gameplay at the bottom</div>
+    </div>
+    <div class="cards2">
+      <div class="card rise" style="--d:.75s"><span class="x">▣</span><b>Subway Surfers</b> &amp; <b>Minecraft parkour</b> — the certified background-champions.</div>
+      <div class="card rise" style="--d:.88s"><span class="x">▣</span>Keeps the reward pathway busy so you can finally <b>finish the actual video</b>.</div>
+    </div>
+    <div class="stamp-wrap fade" style="--d:1s"><span class="stamp-chip black">REAL</span></div>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">18</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">but seriously</div>
+    <h1 class="big rise" style="--d:.15s">Ok, for real: the <span class="accent">actual</span> actual fix</h1>
+    <div class="cards2">
+      <div class="card pop" style="--d:.3s"><span class="x">▣</span><b>Discipline.</b> Not an app. Boring, consistent, and it actually works.</div>
+      <div class="card pop" style="--d:.42s"><span class="x">▣</span><b>Self-control.</b> Timer on. Phone in another room. Door closed.</div>
+      <div class="card pop" style="--d:.54s"><span class="x">▣</span><b>Sleep &amp; exercise.</b> Your attention runs on fuel. Refuel.</div>
+      <div class="card pop" style="--d:.66s"><span class="x">▣</span><b>Boundaries.</b> One feed, scheduled. Not infinite.</div>
+    </div>
+    <p class="quiz-note rise" style="--d:.8s">sorry — there is no app for that. the app is <b>you</b>.</p>
+    <div class="stamp-wrap fade" style="--d:.9s"><span class="stamp-chip red">FOR REAL</span></div>
+  </div>
+</section>
+
+<section class="slide">
+  <span class="pg">19</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">you survived</div>
+    <h1 class="q-big rise" style="--d:.15s">Any <span class="r">questions?</span></h1>
+    <p class="sub fade" style="--d:.4s">thanks for your attention. genuinely.</p>
+  </div>
+</section>
+
+<section class="slide no-vid">
+  <span class="pg">20</span>
+  <div class="inner">
+    <div class="kicker rise" style="--d:.05s">one last thing</div>
+    <h1 class="big rise" style="--d:.15s">Totally <span class="stroke">unrelated.</span></h1>
+    <p class="sub fade" style="--d:.35s">plays once. like a good episode.</p>
+  </div>
+</section>
+
+<div id="videozone" class="left">
+  <div class="stage" id="stage">
+    <div class="now-playing" id="nowPlaying">now playing · <b>subway surfers</b></div>
+    <div class="tile" id="tile1">
+      <div class="fallback">drop <b>vid1.mp4</b> here —<br>subway surfers gameplay</div>
+      <span class="tag">subway surfers · left half</span>
+      <video id="vid1" autoplay muted loop playsinline preload="auto"></video>
+    </div>
+    <div class="tile" id="tile2">
+      <div class="fallback">drop <b>vid2.mp4</b> here —<br>minecraft parkour</div>
+      <span class="tag">minecraft parkour · right half</span>
+      <video id="vid2" autoplay muted loop playsinline preload="auto"></video>
+    </div>
+  </div>
+</div>
+
+<div id="video3">
+  <div class="v3-top"><div class="kicker">no questions were answered</div></div>
+  <div class="fallback">drop <b>vid3.mp4</b> here</div>
+  <video id="vid3" autoplay muted playsinline preload="auto"></video>
+  <div class="v3-overlay" id="v3Overlay">
+    <h2>that's it.</h2>
+    <p>go touch grass. thanks for watching.</p>
+  </div>
+</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const n = slides.length;
+const progressBar = document.getElementById('progressBar');
+const counter = document.getElementById('counter');
+const zone = document.getElementById('videozone');
+const nowPlaying = document.getElementById('nowPlaying');
+const tile1 = document.getElementById('tile1');
+const tile2 = document.getElementById('tile2');
+const video3 = document.getElementById('video3');
+const v3overlay = document.getElementById('v3Overlay');
+const v1 = document.getElementById('vid1');
+const v2 = document.getElementById('vid2');
+const v3 = document.getElementById('vid3');
+const soundBtn = document.getElementById('soundBtn');
+const hint = document.getElementById('hint');
+
+let cur = 0;
+let curVid = null;
+let revealed = false;
+let soundOn = false;
+let v3Started = false;
+let v3Ended = false;
+const lastIdx = n - 1;
+
+const vidSched = {1:'v1',2:'v1',3:'v1',4:'v1',5:'v2',6:'v2',7:'v1',8:'v1',9:'v1',10:'v1',11:'v2',12:'v2',13:'v2',14:'v2',15:'v2',16:'v2',17:'v2',18:'v2'};
+
+function setVideos(){
+  v1.src = 'vid1.mp4';
+  v2.src = 'vid2.mp4';
+  v3.src = 'vid3.mp4';
+  [v1, v2, v3].forEach(v => {
+    v.addEventListener('error', () => { v.style.display = 'none'; });
+    v.play().catch(() => {});
+  });
+  v3.addEventListener('ended', () => {
+    v3Ended = true;
+    v3overlay.classList.add('show');
+  });
+}
+
+function setVid(which){
+  nowPlaying.innerHTML = which === 'v1'
+    ? 'now playing · <b>subway surfers</b>'
+    : 'now playing · <b>minecraft parkour</b>';
+  tile1.classList.toggle('active', which === 'v1');
+  tile2.classList.toggle('active', which === 'v2');
+  curVid = which;
+}
+
+function show(i){
+  cur = Math.max(0, Math.min(lastIdx, i));
+  slides.forEach((s, idx) => {
+    s.classList.toggle('active', idx === cur);
+    s.classList.remove('video-layout', 'cont-right', 'cont-left');
+  });
+  progressBar.style.width = ((cur + 1) / n * 100) + '%';
+  counter.innerHTML = '<b>' + (cur + 1) + '</b> / ' + n;
+  const vid = vidSched[cur];
+  const hasVid = vid !== undefined;
+  const slide = slides[cur];
+  if (hasVid) {
+    slide.classList.add('video-layout');
+    slide.classList.toggle('cont-right', vid === 'v1');
+    slide.classList.toggle('cont-left', vid === 'v2');
+    zone.classList.toggle('left', vid === 'v1');
+    zone.classList.toggle('right', vid === 'v2');
+    zone.classList.add('show');
+    if (vid !== curVid) setVid(vid);
+  } else {
+    zone.classList.remove('show');
+  }
+  if (cur === lastIdx) {
+    video3.classList.add('show');
+    if (!v3Started) { v3.play().catch(() => {}); v3Started = true; }
+    if (v3Ended) v3overlay.classList.add('show');
+  } else {
+    video3.classList.remove('show');
+  }
+}
+
+function reveal(){
+  if (revealed) return;
+  revealed = true;
+  const fakeBlock = document.getElementById('fakeBlock');
+  const fakeTitle = document.getElementById('fakeTitle');
+  const slash = document.getElementById('slash');
+  const stamp = document.getElementById('stamp');
+  const realBlock = document.getElementById('realBlock');
+  fakeTitle.classList.add('shake');
+  slash.classList.add('go');
+  setTimeout(() => stamp.classList.add('go'), 620);
+  setTimeout(() => fakeBlock.classList.add('cut'), 1450);
+  setTimeout(() => realBlock.classList.add('show'), 1850);
+}
+
+function advance(){
+  if (cur === 0 && !revealed) { reveal(); return; }
+  show(cur + 1);
+}
+
+setTimeout(() => hint.classList.add('hide'), 6500);
+
+document.addEventListener('keydown', e => {
+  switch (e.key) {
+    case ' ':
+    case 'Enter':
+    case 'ArrowRight':
+    case 'ArrowDown':
+    case 'PageDown':
+    case 'd': case 'D':
+    case 'f': case 'F':
+      e.preventDefault(); advance(); break;
+    case 'ArrowLeft':
+    case 'ArrowUp':
+    case 'PageUp':
+    case 'Backspace':
+    case 'a': case 'A':
+      e.preventDefault(); show(cur - 1); break;
+    case 'Home': e.preventDefault(); show(0); break;
+    case 'End': e.preventDefault(); show(lastIdx); break;
+  }
+});
+
+let px = 0, py = 0;
+document.addEventListener('pointerdown', e => { px = e.clientX; py = e.clientY; });
+document.addEventListener('pointerup', e => {
+  if (e.target.closest('.no-nav')) return;
+  const dx = e.clientX - px;
+  const dy = e.clientY - py;
+  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) advance();
+  else if (dx < -50) advance();
+  else if (dx > 50) show(cur - 1);
+});
+
+soundBtn.addEventListener('click', () => {
+  soundOn = !soundOn;
+  [v1, v2, v3].forEach(v => { v.muted = !soundOn; });
+  soundBtn.textContent = soundOn ? '🔊' : '🔇';
+});
+
+setVideos();
+show(0);
+</script>
+</body>
+</html>
